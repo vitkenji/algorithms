@@ -1,53 +1,56 @@
 #include "dijkstra.h"
 
-void initializeSingleSource(LGraph** G, Heap* h)
+void initializeSingleSource(LGraph* G, PQueue* q, int source)
 {
-    for(int i = 0; i < (*G)->V; i++)
+    for(int i = 0; i < G->V; i++)
     {
-        h->vertices[i] = i;
-        h->position[h->vertices[i]] = i;
-        h->distance[i] = 100;
-        (*G)->adj[i]->distance = 100;
+        minHeapInsert(q, i == source ? 0 : INT_MAX, i);
     }
-    h->distance[0] = 0;
-    (*G)->adj[0]->distance = 0;
 }
 
-void dijkstra(LGraph* G, int s)
+void relax(PQueue* q, int v, int u, int weight)
 {
-    Heap* h = createHeap(G->V);
-    initializeSingleSource(&G, h);
-
-    while(h->size > 0)
+    if(u == INT_MAX)
     {
-        int u = heapExtractMin(h);
-        
-        Node* aux = G->adj[u];
-        while(aux != NULL && aux->id != INT_MAX)
+        return;
+    }
+    if(q->positions[v] != -1 && q->distances[q->positions[v]] > u + weight)
+    {
+        heapDecreaseKey(q, q->positions[v], u + weight);
+        q->predecessors[q->positions[v]] = u;
+    }
+}
+
+int* dijkstra(LGraph* G, int source)
+{
+    int* shortest_paths = (int*) malloc(sizeof(int) * G->V);
+    PQueue* q = createPQueue(G->V);
+    initializeSingleSource(G, q, source);
+
+    while(q->n > 0)
+    {
+        int u = q->vertices[0];
+        int dist_u = q->distances[0];
+        shortest_paths[u] = dist_u;
+
+        heapExtractMin(q);
+
+        Node* node = G->adj[u];
+        while(node != NULL)
         {
-            int v = aux->id;
-            relax(&G, h, v, u, aux->weight);
-            aux = aux->next;
+            relax(q, node->index, dist_u, node->weight);
+            node = node->next;
         }
     }
-    printDijkstra(G);
+    return shortest_paths;
 }
 
-
-void printDijkstra(LGraph* G)
+void printDijkstra(int* array, int size, int source)
 {
-    printf("Dijkstra: \n");
-    for(int v = 0; v < G->V; v++)
+    printf("\nShortest paths for source = %d:\n", source);
+    for(int i = 0; i < size; i++)
     {
-        printf("0 -> %d =  %d\n", v, G->adj[v]->distance);
-    }
-}
-
-void relax(LGraph** G, Heap* h, int v, int u, int w)
-{
-    if((*G)->adj[v]->distance > (*G)->adj[u]->distance + w)
-    {
-        (*G)->adj[v]->distance = (*G)->adj[u]->distance + w;
-        heapDecreaseKey(h, h->position[v], (*G)->adj[u]->distance + w);
+        
+        array[i] < 2000000 ?  printf("%d ", array[i]) : printf("- ");
     }
 }

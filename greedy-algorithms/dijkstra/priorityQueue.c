@@ -1,47 +1,64 @@
 #include "priorityQueue.h"
 
-int heapMinimum(Heap* h)
+int heapMinimum(PQueue* q)
 {
-    return h->vertices[0];
-}
-
-int heapExtractMin(Heap* h)
-{
-    if(h->size < 1)
+    if(q->n == 0)
     {
-        printf("heap underflow");
+        printf("Empty queue\n");
         exit(1);
     }
-    int min = heapMinimum(h);
-    h->vertices[0] = h->vertices[h->size - 1];
-    h->distance[0] = h->distance[h->size - 1];
-    h->size--;
-    minHeapify(h, 0);
+    return q->distances[0];
+}
+
+int heapExtractMin(PQueue* q)
+{
+    if(q->n < 1)
+    {
+        printf("Error: heap underflow\n");
+        exit(1);
+    }
+    int min = q->vertices[0];
+    int last_v = q->vertices[q->n - 1];
+
+    q->distances[0] = q->distances[q->n - 1];
+    q->vertices[0] = q->vertices[q->n - 1];
+    q->predecessors[0] = q->predecessors[q->n - 1];
+    
+    q->positions[last_v] = 0;
+    q->positions[min] = -1;
+    q->n--;
+
+    minHeapify(q, 0);
     return min;
-
 }
 
-void heapDecreaseKey(Heap* h, int index, int d)
+void heapDecreaseKey(PQueue* q, int index, int key)
 {
-  if(d > h->distance[index])
+    if(key > q->distances[index])
     {
-        printf("new key is higher than actual key");
+        printf("Error: new key is higher than actual key\n");
         exit(1);
     }
-    h->distance[index] = d;
-    while(index > 0 && h->distance[parent(index)] > h->distance[index])
+    q->distances[index] = key;
+
+    while(index> 0 && q->distances[parent(index)] > q->distances[index])
     {
-        swap(h, index, parent(index));
+        swap(q, index, parent(index));
         index = parent(index);
     }
 }
 
-void minHeapInsert(Heap* h, int v, int d)
+void minHeapInsert(PQueue* q, int key, int index)
 {
-    h->size++;
-    h->vertices[h->size - 1] = v;
-    h->distance[h->size - 1] = d;
-    h->position[v] = h->size - 1;
-    heapDecreaseKey(h, v, d);
-    
+    if(q->n >= q->size)
+    {
+        printf("Error: heap overflow\n");
+        return;
+    }
+    q->n++;
+    q->vertices[q->n - 1] = index;
+    q->distances[q->n - 1] = +INT_MAX;
+    q->predecessors[q->n - 1] = -1;
+    q->positions[index] = q->n - 1;
+    heapDecreaseKey(q, q->n - 1, key);
 }

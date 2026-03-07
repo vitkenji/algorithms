@@ -1,14 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 
 typedef struct node
 {
-    int id;
-    struct node* next;
-    int distance;
-    int parent;
+    int index;
     int weight;
+    struct node* next;
 
 }Node;
 
@@ -19,6 +16,11 @@ typedef struct Lgraph{
     
 }LGraph;
 
+LGraph* create_L(int n);
+void insertEdge_L(LGraph* G, int v1, int v2, int weight);
+void removeEdge_L(LGraph* G, int v1, int v2);
+void print_L(LGraph* G);
+
 typedef struct Mgraph{
     int E;
     int V;
@@ -26,17 +28,7 @@ typedef struct Mgraph{
 
 }MGraph;
 
-void printLGraph(LGraph* G, int size);
-void printLGraphWeight(LGraph* G, int size);
-LGraph* createLGraph(int size);
-void InsertEdgeListDirectional(LGraph* GrafoA, int index, int data);
-void InsertWeightEdgeListDirectional(LGraph* GrafoA, int v1, int v2, int weight);
-void InsertEdgeList( LGraph* GrafoA, int data1, int data2);
-void InsertWeightEdgeList(LGraph* GrafoA, int data1, int data2, int weight);
-
-void printMGraph(MGraph* G, int size);
-MGraph* createMGraph(int size);
-void insertWeightEdgeMatrix(MGraph* G, int v1, int v2, int weight);
-void insertEdgeMatrix(MGraph* G, int v1, int v2);
-
-void correctAdj(LGraph* G);
+MGraph* create_M(int n);
+void insertEdge_M(MGraph* G, int v1, int v2, int weight);
+void removeEdge_M(MGraph* G, int v1, int v2);
+void print_M(MGraph* G);

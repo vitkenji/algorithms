@@ -1,7 +1,7 @@
 #include "heap.h"
 
-int heapMinimum(Heap* h);
-int heapExtractMin(Heap* h);
-void heapDecreaseKey(Heap* h, int index, int d);
-void minHeapInsert(Heap* h, int v, int d);
+int heapMinimum(PQueue* q);
+int heapExtractMin(PQueue* q);
+void heapDecreaseKey(PQueue* q, int index, int key);
+void minHeapInsert(PQueue* q, int key, int index);
 

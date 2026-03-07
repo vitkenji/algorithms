@@ -1,8 +1,8 @@
 #include "graph.h"
 #include "priorityQueue.h"
 
-void initializeSingleSource(LGraph** G, Heap* h);
-void dijkstra(LGraph* G, int s);
-void relax(LGraph** G, Heap* h,int v, int u, int w);
+void initializeSingleSource(LGraph* G, PQueue* q, int source);
+void relax(PQueue* q,int v, int u, int weight);
+int* dijkstra(LGraph* G, int source);
 
-void printDijkstra(LGraph* G);
+void printDijkstra(int* array, int size, int source);

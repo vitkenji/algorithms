@@ -1,184 +1,172 @@
 #include "graph.h"
 
-void printLGraph(LGraph* G, int size)
-{
-    printf("Graph: \n");
-    for(int i = 0; i < size; i++)
-    {
-        printf("%d -> ", i);
-        Node* current = G->adj[i]; // Usando uma variável auxiliar para percorrer a lista
-        while(current != NULL)
-        {
-           if(current->id != INT_MAX ){ printf("%d ", current->id); }
-            current = current->next;
-        }
-        printf("\n");
-    }
-}
-
-
-void printMGraph(MGraph* G, int size)
-{
-   printf("Graph: \n");
-   printf("     ");
-    for(int i = 0; i < size; i++)
-    {
-        printf("%d ", i);
-    }
-    printf("\n");
-    printf("     ");
-    for(int i = 0; i < size; i++)
-    {
-        printf("| ");
-    }
-    printf("\n");
-    for(int i = 0; i < size; i++)
-    {
-        printf("%d--  ", i);
-        for(int v = 0; v < size; v++)
-        {
-            printf("%d ", G->matrix[i][v]);
-        }
-        printf("\n");
-    }
-}
-
-LGraph* createLGraph(int size)
+LGraph* create_L(int n)
 {
     LGraph* G = (LGraph*) malloc(sizeof(LGraph));
-    G->V = size;
+    G->V = n;
     G->E = 0;
-    G->adj = (Node**) malloc(sizeof(Node*)*size);
-    for(int v = 0; v < G->V; v++)
+    G->adj =  (Node**) malloc(sizeof(Node*) * n);
+    for(int i = 0; i < n; i++)
     {
-        G->adj[v] = NULL;
-    }
-    
-    return G;
-}
-
-
-MGraph* createMGraph(int size)
-{
-    MGraph* G = (MGraph*) malloc(sizeof(MGraph));
-    G->V = size;
-    G->E = 0;
-    G->matrix = (int**) malloc(sizeof(int*) * size);
-    for(int i = 0; i < size; i++)
-    {
-        G->matrix[i] = (int*) malloc(sizeof(int) * size);
-    }
-     for(int i = 0; i < size; i++)
-    {
-         for(int j = 0; j < size; j++)
-         {
-            G->matrix[i][j] = 0;
-         }
+        G->adj[i] = NULL;
     }
     return G;
 }
 
-void insertWeightEdgeMatrix(MGraph* G, int v1, int v2, int weight)
+void insertEdge_L(LGraph* G, int v1, int v2, int weight)
 {
-    G->E++;
-    G->matrix[v1][v2] = weight;
-    G->matrix[v2][v1] = weight;
-
-}
-
-void insertEdgeMatrix(MGraph* G, int v1, int v2)
-{
-    G->E++;
-    G->matrix[v1][v2] = 1;
-    G->matrix[v2][v1] = 1;
-}
-
-void InsertEdgeListDirectional(LGraph* GrafoA, int index, int data){
-
-   //printf("ligação %d , %d \n", data1, data2);
-   Node* no1 = (Node *)malloc( sizeof(Node));
-   no1->id = data;
-   no1->next = NULL;
-   //inserindo no 2
-   if(GrafoA->adj[index] == NULL)
-   {
-      GrafoA->adj[index] = no1;
-   }
-   else
-   {
-      Node* noAux = GrafoA->adj[index];
-      while(noAux->next != NULL)
-      {
-         noAux = noAux->next;
-         //printf("id: %d \n", noAux->id);
-      }
-      noAux->next = no1;
-   }
-}
-
-void InsertEdgeList( LGraph* GrafoA, int data1, int data2){
-   GrafoA->E += 1;
-   InsertEdgeListDirectional( GrafoA, data1, data2);
-   InsertEdgeListDirectional( GrafoA, data2, data1);     
-}
-
-void correctAdj(LGraph* G)
-{
-    for(int v = 0; v < G->V; v++)
+    if(v1 >= G->V || v2 >= G->V || v1 < 0 || v2 < 0)
     {
-        if(G->adj[v] == NULL)
+        printf("error: node doesn't exist");
+        return;
+    }
+
+    Node* node = G->adj[v1];
+    while(node != NULL)
+    {
+        if(node->index == v2)
         {
-            Node* node = (Node*) malloc(sizeof(Node));
-            node->id = INT_MAX;
-            node->next = NULL;
-            G->adj[v] = node;
-            
+            return;
+        }
+        node = node->next;
+    }
+
+    Node* inserted_1 = (Node*) malloc(sizeof(Node));
+    inserted_1->index = v2;
+    inserted_1->weight = weight;
+    inserted_1->next = G->adj[v1];
+    G->adj[v1] = inserted_1;
+
+    G->E++;
+}
+
+void removeEdge_L(LGraph* G, int v1, int v2)
+{
+    if(v1 >= G->V || v2 >= G->V || v1 < 0 || v2 < 0)
+    {
+        printf("error: node doesn't exist");
+        return;
+    }
+
+    int removed = 0;
+
+    Node* node = G->adj[v1];
+    Node* prev = NULL;
+
+    while(node != NULL)
+    {
+        if(node->index == v2)
+        {
+            if(prev == NULL)
+            {
+                G->adj[v1] = node->next;
+            }
+            else
+            {
+                prev->next = node->next;
+            }
+            free(node);
+            removed = 1;
+            break;
+        }
+        prev = node;
+        node = node->next;
+    }
+
+    if(removed)
+    {
+        G->E--;
+    }
+}
+
+void print_L(LGraph* G)
+{
+    printf("\nGraph:\n");
+    for(int i = 0; i < G->V; i++)
+    {
+        printf("\n %d |", i);
+        Node* node = G->adj[i];
+        while(node != NULL)
+        {
+            printf("-> %d(%d) ", node->index, node->weight);
+            node = node->next;
         }
     }
+    printf("\n"); 
 }
 
-void InsertWeightEdgeListDirectional(LGraph* GrafoA, int v1, int v2, int weight)
+MGraph* create_M(int n)
 {
-   Node* no1 = (Node *)malloc( sizeof(Node));
-   no1->id = v2;
-   no1->weight = weight;
-   no1->next = NULL;
-   //inserindo no 2
-   if(GrafoA->adj[v1] == NULL)
-   {
-      GrafoA->adj[v1] = no1;
-   }
-   else
-   {
-      Node* noAux = GrafoA->adj[v1];
-      while(noAux->next != NULL)
-      {
-         noAux = noAux->next;
-         //printf("id: %d \n", noAux->id);
-      }
-      noAux->next = no1;
-   }
-}
-
-void printLGraphWeight(LGraph* G, int size)
-{
-     printf("Graph: \n");
-    for(int i = 0; i < size; i++)
+    MGraph* G = (MGraph*) malloc(sizeof(MGraph));
+    G->V = n;
+    G->E = 0;
+    G->matrix = (int**) malloc(sizeof(int*) * n);
+    for(int i = 0; i < n; i ++)
     {
-        printf("%d -> ", i);
-        Node* current = G->adj[i]; // Usando uma variável auxiliar para percorrer a lista
-        while(current != NULL)
+        G->matrix[i] = (int*) malloc(sizeof(int) * n);
+    }
+    
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
         {
-           if(current->id != INT_MAX ){ printf("%d(%d) ", current->id, current->weight); }
-            current = current->next;
+            G->matrix[i][j] = 0;
+        }
+    }
+
+    return G;
+}
+
+void insertEdge_M(MGraph* G, int v1, int v2, int weight)
+{  
+    if(v1 >= G->V || v2 >= G->V || v1 < 0 || v2 < 0)
+    {
+        printf("error: node doesn't exist");
+        return;
+    }
+
+    if(G->matrix[v1][v2] == 0)
+    {
+        G->matrix[v1][v2] = weight;
+        G->E++;
+    }
+}
+
+void removeEdge_M(MGraph* G, int v1, int v2)
+{
+    if(v1 >= G->V || v2 >= G->V || v1 < 0 || v2 < 0)
+    {
+        printf("error: node doesn't exist");
+        return;
+    }
+
+    else if(G->matrix[v1][v2] == 0)
+    {
+        printf("error: edge doesn't exist");
+        return;
+    }
+
+    G->matrix[v1][v2] = 0;
+    G->E--;
+}
+
+void print_M(MGraph* G)
+{
+    printf("\nGraph:");
+    printf("\n\n   ");
+    for(int i = 0; i < G->V; i++)
+    {
+        printf("|_%d_", i);
+    } 
+    printf("\n");
+    for(int i = 0; i < G->V; i++)
+    {
+        printf("%d: ", i);
+        for(int j = 0; j < G->V; j++)
+        {
+            printf("| %d ", G->matrix[i][j]);
         }
         printf("\n");
     }
-}
-
-void InsertWeightEdgeList(LGraph* GrafoA, int data1, int data2, int weight)
-{
-    GrafoA->E += 1;
-   InsertWeightEdgeListDirectional( GrafoA, data1, data2, weight);
-   InsertWeightEdgeListDirectional( GrafoA, data2, data1, weight);   
+    printf("\n");
 }

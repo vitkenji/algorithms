@@ -1,12 +1,21 @@
 #include "heap.h"
 
-Heap* createHeap(int size)
+PQueue* createPQueue(int size)
 {
-    Heap* h = (Heap*) malloc(sizeof(Heap));
-    h->vertices = (int*) malloc(sizeof(int)*size);
-    h->distance = (int*) malloc(sizeof(int)*size);
-    h->position = (int*) malloc(sizeof(int)*size);
-    h->size = size;
+    PQueue* q = (PQueue*) malloc(sizeof(PQueue));
+    q->distances = (int*) malloc(sizeof(int) * size);
+    q->vertices = (int*) malloc(sizeof(int) * size);
+    q->predecessors = (int*) malloc(sizeof(int) * size);
+    q->positions = (int*) malloc(sizeof(int) * size);
+    q->size = size;
+    q->n = 0;
+
+    for(int i = 0; i < q->size; i++)
+    {
+        q->positions[i] = -10;
+    }
+
+    return q;
 }
 
 int parent(int i)
@@ -16,21 +25,21 @@ int parent(int i)
 
 int left(int i)
 {
-    return(2*i + 1);
+    return(2 * i + 1);
 }
 
 int right(int i)
 {
-    return (2*i + 2);
+    return (2 * i + 2);
 }
 
-void minHeapify(Heap* h, int index)
+void minHeapify(PQueue* q, int index)
 {
     int l = left(index);
     int r = right(index);
     int smallest;
 
-    if(l < h->size && h->distance[l] < h->distance[index]) // which one is smaller: left or parent
+    if(l < q->n && q->distances[l] < q->distances[index]) // which is smaller: left or parent
     {
         smallest = l;
     }
@@ -39,66 +48,71 @@ void minHeapify(Heap* h, int index)
         smallest = index;
     }
 
-    if(r < h->size && h->distance[r] < h->distance[smallest]) // which one is smaller: left, parent, or right
+    if(r < q->n && q->distances[r] < q->distances[smallest]) // which is the smallest: left, right or parent
     {
         smallest = r;
     }
+
     if(smallest != index)
     {
-        swap(h, smallest, index); // places the smallest in parent position
-        minHeapify(h, smallest);
-        
+        swap(q, smallest, index); // the smallest goes to parent position
+        minHeapify(q, smallest); 
     }
 }
 
-void buildMinHeap(Heap* h)
+void buildMinHeap(PQueue* q)
 {
-    for(int i = (h->size / 2) - 1; i >= 0; i--) // i = 4,3,2,1,0
+    for(int i = (q->n / 2) - 1; i >= 0; i--)
     {
-        minHeapify(h, i);
+        minHeapify(q, i);
     }
 }
 
-void swap(Heap* h, int pos1, int pos2)
+void swap(PQueue* q, int pos1, int pos2)
 {
-    h->position[h->vertices[pos1]] = pos2;
-    h->position[h->vertices[pos2]] = pos1;
+    int aux = q->distances[pos1];
+    int aux_index = q->vertices[pos1];
+    int aux_pred = q->predecessors[pos1];
 
-    int aux = h->distance[pos1];
-    h->distance[pos1] = h->distance[pos2];
-    h->distance[pos2] = aux;
+    q->distances[pos1] = q->distances[pos2];
+    q->vertices[pos1] = q->vertices[pos2];
+    q->predecessors[pos1] = q->predecessors[pos2];
 
-    aux = h->vertices[pos1];
-    h->vertices[pos1] = h->vertices[pos2];
-    h->vertices[pos2] = aux;
+    q->distances[pos2] = aux;
+    q->vertices[pos2] = aux_index;
+    q->predecessors[pos2] = aux_pred;
 
+    q->positions[q->vertices[pos1]] = pos1;
+    q->positions[q->vertices[pos2]] = pos2;
 }
 
-void printArray(int* array, int size)
+void printPQueue(PQueue* q)
 {
-    printf("array: ");
-    for(int i = 0; i != size; i++)
+    printf("\nPriority Queue:\n");
+    
+    printf("\nPositions:  ");
+    for(int i = 0; i < q->size; i++)
     {
-        printf("%d ", array[i]);
-    }
-    printf("\n");
-}
-
-void swapHeap(int* xp, int* yp)
-{
-    int temp = *xp;
-    *xp = *yp;
-    *yp = temp;
-}
-
-int findIndex(Heap* h, int size, int v)
-{
-    for(int i = 0; i < size; i++)
-    {
-        if(h->vertices[i] == v)
+        if(q->positions[i] != -10)
         {
-            return i;
+            printf("%d ", q->positions[i]);
         }
     }
-    return -1;
+
+    printf("\nVertices:   ");
+    for(int i = 0; i < q->n; i++)
+    {
+        printf("%d ", q->vertices[i]);
+    }
+    printf("\nDistances:  ");
+    for(int i = 0; i < q->n; i++)
+    {
+        printf("%d ", q->distances[i]);
+    }
+    //printf("\nPredecessors:  ");
+    for(int i = 0; i < q->n; i++)
+    {
+        //printf("%d ", q->predecessors[i]);
+    }
+    printf("\n\n");
 }
